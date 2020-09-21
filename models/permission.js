@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       models.Account.belongsTo(models.Permission, {
         foreignKey: {
-          allowNull: false
+          //allowNull: false
         }
       })
     }

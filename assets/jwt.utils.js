@@ -14,5 +14,27 @@ module.exports = {
             {
                 expiresIn: '1h'
             })
+    },
+
+    parseAuthorization: function (authorization) {
+        return (authorization != null) ? authorization.replace('Bearer ', '') : null;
+    },
+
+    getUser: function (authorization) {
+        var userId = -1;
+        var token = module.exports.parseAuthorization(authorization);
+        if(token != null) {
+            try {
+                var jwtToken = jwt.verify(token, JWT_SIGN_SECRET);
+                if (jwtToken != null) {
+                    user = {
+                        userId: jwtToken.userId,
+                        permission_id: jwtToken.permission_id
+                    }
+                }
+            }
+            catch (err) { }
+        }
+        return user;
     }
 }

@@ -19,7 +19,7 @@ exports.router = (function () {
     apiRouter.route('/users/me').get(UsersController.getUserProfile);
 
     // Update user profile
-    apiRouter.route('/users/me/update').get(UsersController.getUserProfile);
+    apiRouter.route('/users/me/update').put(UsersController.UpdateUserProfile);
 
     return apiRouter;
 })();

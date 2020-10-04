@@ -195,9 +195,12 @@ module.exports = {
             },
             function (userFound) {
                 if (userFound){
+                    let generateToken = jwtUtils.generateTokenForUser(userFound);
+                    // set it in an HTTP Only + Secure Cookie
+                    res.cookie("SESSIONID", generateToken, {httpOnly:true, secure:true});
                     return res.status(200).json(response.success({
                         'user_id': userFound.id,
-                        'token': jwtUtils.generateTokenForUser(userFound)
+                        'token': generateToken
                     }));
                 }
                 else {

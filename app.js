@@ -4,9 +4,13 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const apiRouter = require('./apiRouter').router;
 const response = require('./apiRouter');
+const cors = require('cors');
 
 // Morgan
 app.use(morgan('dev'));
+
+// Cors
+app.use(cors());
 
 // Body Parser Configuration
 app.use(bodyParser.urlencoded({ extended: true}));

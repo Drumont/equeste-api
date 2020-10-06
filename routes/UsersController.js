@@ -264,7 +264,7 @@ module.exports = {
         }
     },
 
-    // Update user
+    // Update account
     UpdateUserProfile: function (req, res) {
 
         // Getting auth header
@@ -274,41 +274,62 @@ module.exports = {
         // Params
         //var email = req.body.email;
         //var password = req.body.password;
-        var permission_id = req.body.permission_id;
+        var firstname = req.body.firstname;
+        var lastname = req.body.lastname;
+        var licence = req.body.licence;
+        var phone = req.body.phone;
 
         asyncLib.waterfall([
-            function(done) {
+            function (done) {
                 models.User.findOne({
-                    attributes: ['id', 'permission_id'],
+                    attributes: ['id', 'email', 'account_id'],
                     where: { id: userId }
                 })
                     .then(function (userFound) {
-                    done(null, userFound);
+                        done(null, userFound);
+                    })
+                    .catch(function(err) {
+                        return res.status(500).json(response.error('unable to verify user' + err));
+                    });
+            },
+            function(UserFound, done) {
+                models.Account.findOne({
+                    attributes: ['id', 'firstname', 'lastname', 'licence', 'phone'],
+                    where: { id: UserFound.account_id }
+                })
+                    .then(function (AccountFound) {
+                    done(null, AccountFound);
                     })
                     .catch(function(err) {
                         return res.status(500).json({ 'error': 'unable to verify user' });
                     });
             },
-            function(userFound, done) {
-                if(userFound) {
-                    userFound.update({
-                        permission_id: (permission_id ? permission_id : userFound.permission_id)
+            function(AccountFound, done) {
+                if(AccountFound) {
+                    AccountFound.update({
+                        firstname: (firstname ? firstname : AccountFound.firstname),
+                        lastname: (lastname ? lastname : AccountFound.lastname),
+                        licence: (licence ? licence : AccountFound.licence),
+                        phone: (phone ? phone : AccountFound.phone)
                     }).then(function() {
-                        done(userFound);
+                        done(AccountFound);
                     }).catch(function(err) {
-                        res.status(500).json(response.error('cannot update user' ));
+                        res.status(500).json(response.error('cannot update Account' ));
                     });
                 } else {
-                    res.status(404).json(response.error('user not found' ));
+                    res.status(404).json(response.error('Account not found' ));
                 }
             },
-        ], function(userFound) {
-            if (userFound) {
-                return res.status(201).json(response.success(userFound));
+        ], function(AccountFound) {
+            if (AccountFound) {
+                return res.status(201).json(response.success(AccountFound));
             } else {
                 return res.status(500).json(response.error('cannot update user profile'));
             }
         });
 
     }
+
+
+
 }

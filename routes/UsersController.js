@@ -265,7 +265,7 @@ module.exports = {
     },
 
     // Update account
-    UpdateUserProfile: function (req, res) {
+    updateAccount: function (req, res){
 
         // Getting auth header
         var headerAuth = req.headers['authorization'];
@@ -304,15 +304,15 @@ module.exports = {
                         return res.status(500).json({ 'error': 'unable to verify user' });
                     });
             },
-            function(AccountFound, done) {
-                if(AccountFound) {
-                    AccountFound.update({
-                        firstname: (firstname ? firstname : AccountFound.firstname),
-                        lastname: (lastname ? lastname : AccountFound.lastname),
-                        licence: (licence ? licence : AccountFound.licence),
-                        phone: (phone ? phone : AccountFound.phone)
+            function(accountFound, done) {
+                if(accountFound) {
+                    accountFound.update({
+                        firstname: (firstname ? firstname : accountFound.firstname),
+                        lastname: (lastname ? lastname : accountFound.lastname),
+                        licence: (licence ? licence : accountFound.licence),
+                        phone: (phone ? phone : accountFound.phone)
                     }).then(function() {
-                        done(AccountFound);
+                        done(accountFound);
                     }).catch(function(err) {
                         res.status(500).json(response.error('cannot update Account' ));
                     });
@@ -320,16 +320,85 @@ module.exports = {
                     res.status(404).json(response.error('Account not found' ));
                 }
             },
-        ], function(AccountFound) {
-            if (AccountFound) {
-                return res.status(201).json(response.success(AccountFound));
+            function(accountFound) {
+            if (accountFound) {
+                return res.status(201).json(response.success(accountFound));
             } else {
-                return res.status(500).json(response.error('cannot update user profile'));
+                return res.status(500).json(response.error('cannot update account profile'));
             }
-        });
+        }
+        ]);
+    },
 
+    // Update password
+    updateUserPassword: function (req, res){
+
+        // Search user by using his/her id
+
+        let password = req.body.password;
+        let userId = req.body.userId;
+
+        asyncLib.waterfall([
+            function (done) {
+                models.User.findOne({
+                    attributes: ['id', 'email', 'account_id', 'permission_id'],
+                    where: { id: userId }
+                })
+                    .then(function (userFound) {
+                        done(null, userFound);
+                    })
+                    .catch(function(err) {
+                        return res.status(500).json(response.error('unable to verify user' + err));
+                    });
+            },
+            function (userFound, done) {
+                if (userFound) {
+                    bcrypt.hash(password, 5, function( err, bcryptedPassword ) {
+                        done(null, userFound, bcryptedPassword);
+                    });
+                } else {
+                    return res.status(409).json(response.error('user not exist'));
+                }
+            },
+            function (userFound, bcryptedPassword, done) {
+                userFound.update({
+                    password: (password ? bcryptedPassword : userFound.password),
+                }).then(function() {
+                    done(null, userFound);
+                }).catch(function(err) {
+                    res.status(500).json(response.error('cannot update user password' ));
+                });
+            },
+            function(userFound) {
+                if (userFound) {
+                    return res.status(201).json(response.success(userFound));
+                } else {
+                    return res.status(500).json(response.error('cannot update account profile'));
+                }
+            }
+        ]);
+
+    },
+
+    // Search a user by his/her email
+    searchUserByEmail: function (req, res){
+
+        let email = req.body.email;
+
+        models.User.findOne({
+            attributes: ['id', 'email', 'account_id', 'permission_id'],
+            where: { email: email }
+        })
+            .then(function (userFound) {
+                if (userFound) {
+                    return res.status(201).json(response.success(userFound));
+                } else {
+                    res.status(404).json(response.error('User not found'));
+                }
+            })
+            .catch(function(err) {
+                return res.status(500).json(response.error('Cannot fetch user' + err));
+            });
     }
-
-
 
 }

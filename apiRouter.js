@@ -18,8 +18,14 @@ exports.router = (function () {
     // Get user profile
     apiRouter.route('/users/me').get(UsersController.getUserProfile);
 
-    // Update user profile
-    apiRouter.route('/users/me/update').put(UsersController.UpdateUserProfile);
+    // Update account informations
+    apiRouter.route('/users/me/update').put(UsersController.updateAccount);
+
+    // Update user password
+    apiRouter.route('/users/update-password').put(UsersController.updateUserPassword);
+
+    // Search user by email
+    apiRouter.route('/users/search/user-by-email').get(UsersController.searchUserByEmail);
 
     return apiRouter;
 })();

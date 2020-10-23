@@ -172,7 +172,7 @@ module.exports = {
                         done(null, userFound);
                     })
                     .catch(function (err){
-                        return res.status(500).json(response.error('Unable to verify user'));
+                        return res.status(500).json(response.error('Unable to verify user' + err ));
 
                     })
             },
@@ -209,32 +209,6 @@ module.exports = {
             }
         ])
 
-        /*
-        models.User.findOne({
-            where: {email: email}
-        })
-            .then(function (userFound) {
-                if(userFound) {
-                    bcrypt.compare(password, userFound.password, function (errBycrypt, resBycrypt) {
-                        if(resBycrypt) {
-                            return res.status(200).json(response.success({
-                                'user_id': userFound.id,
-                                'token': jwtUtils.generateTokenForUser(userFound)
-                            }));
-                        }
-                        else {
-                            return res.status(403).json(response.error('Invalid password'));
-                        }
-                    })
-                } else {
-                    return res.status(404).json(response.error('User not exist in DB'));
-                }
-            })
-            .catch(function (err) {
-                return res.status(500).json(response.error('Unable to verify user'));
-            })
-
-         */
     },
 
     // User profile
@@ -274,10 +248,10 @@ module.exports = {
         // Params
         //var email = req.body.email;
         //var password = req.body.password;
-        var firstname = req.body.firstname;
-        var lastname = req.body.lastname;
-        var licence = req.body.licence;
-        var phone = req.body.phone;
+        let firstname = req.body.firstname;
+        let lastname = req.body.lastname;
+        let licence = req.body.licence;
+        let phone = req.body.phone;
 
         asyncLib.waterfall([
             function (done) {
@@ -292,16 +266,16 @@ module.exports = {
                         return res.status(500).json(response.error('unable to verify user' + err));
                     });
             },
-            function(UserFound, done) {
+            function(userFound, done) {
                 models.Account.findOne({
                     attributes: ['id', 'firstname', 'lastname', 'licence', 'phone'],
-                    where: { id: UserFound.account_id }
+                    where: { id: userFound.account_id }
                 })
-                    .then(function (AccountFound) {
-                    done(null, AccountFound);
+                    .then(function (accountFound) {
+                    done(null, accountFound);
                     })
                     .catch(function(err) {
-                        return res.status(500).json({ 'error': 'unable to verify user' });
+                        return res.status(500).json({ 'error': 'unable to verify account' });
                     });
             },
             function(accountFound, done) {
@@ -311,11 +285,13 @@ module.exports = {
                         lastname: (lastname ? lastname : accountFound.lastname),
                         licence: (licence ? licence : accountFound.licence),
                         phone: (phone ? phone : accountFound.phone)
-                    }).then(function() {
-                        done(accountFound);
-                    }).catch(function(err) {
-                        res.status(500).json(response.error('cannot update Account' ));
-                    });
+                    })
+                        .then(function() {
+                            done(null, accountFound);
+                        })
+                        .catch(function(err) {
+                            res.status(500).json(response.error('cannot update Account' ));
+                        });
                 } else {
                     res.status(404).json(response.error('Account not found' ));
                 }
@@ -399,6 +375,30 @@ module.exports = {
             .catch(function(err) {
                 return res.status(500).json(response.error('Cannot fetch user' + err));
             });
+    },
+
+    // Get a user by id
+    getUserById: function (id) {
+        if (userId < 0) {
+            return response.error('Wrong token');
+        } else {
+            models.User.findOne({
+                attributes: ['id', 'email', 'account_id', 'permission_id'],
+                where: { id: id }
+            })
+                .then(function (userFound) {
+                    if (userFound) {
+                        return userFound;
+                    } else {
+                        return response.error('User not found');
+                    }
+                })
+                .catch(function (err) {
+                    return response.error('Cannot fetch user' + err)
+                })
+        }
+
     }
 
 }
+

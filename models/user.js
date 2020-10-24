@@ -13,7 +13,9 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       models.User.hasOne(models.Account),
       models.User.hasOne(models.Permission),
-      models.User.hasMany(models.Horse)
+      models.User.hasMany(models.Horse),
+      models.User.hasMany(models.Course)
+      models.User.hasMany(models.Session)
     }
   };
   User.init({

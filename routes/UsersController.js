@@ -397,7 +397,11 @@ module.exports = {
                     return response.error('Cannot fetch user' + err)
                 })
         }
+    },
 
+    // Permission check for monitor or higher
+    isAble : function (permission_id) {
+        return (permission_id === 1 || permission_id === 3);
     }
 
 }

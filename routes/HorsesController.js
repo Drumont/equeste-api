@@ -27,7 +27,6 @@ module.exports = {
         if (userId < 0) {
             return res.status(400).json(response.error('Wrong token'))
         } else {
-
             asyncLib.waterfall([
                 function (done) {
                     models.User.findOne({
@@ -148,11 +147,11 @@ module.exports = {
                             return res.status(201).json(response.success('Horse delete'));
                         })
                         .catch(function(err) {
-                            res.status(500).json(response.error('cannot update horse'));
+                            res.status(500).json(response.error('cannot delete horse'));
                         });
                 }
                 else {
-                    return res.status(500).json(response.error('You cannot add horse due to your permission'))
+                    return res.status(500).json(response.error('You cannot delete horse due to your permission'))
                 }
             },
         ]);

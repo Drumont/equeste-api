@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
       models.Permission.belongsTo(models.User, {
         foreignKey: {
           //allowNull: false
+          name: 'permission_id'
         }
       })
     }

@@ -297,12 +297,12 @@ module.exports = {
                 }
             },
             function(accountFound) {
-            if (accountFound) {
-                return res.status(201).json(response.success(accountFound));
-            } else {
-                return res.status(500).json(response.error('cannot update account profile'));
+                if (accountFound) {
+                    return res.status(201).json(response.success(accountFound));
+                } else {
+                    return res.status(500).json(response.error('cannot update account profile'));
+                }
             }
-        }
         ]);
     },
 
@@ -402,7 +402,9 @@ module.exports = {
     // Permission check for monitor or higher
     isAble : function (permission_id) {
         return (permission_id === 1 || permission_id === 3);
-    }
+    },
+
+
 
 }
 

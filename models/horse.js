@@ -11,7 +11,8 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      models.Horse.belongsTo(models.User)
+      models.Horse.belongsTo(models.User, {foreignKey: { name: 'user_id'}})
+      //models.Horse.hasOne(models.Session)
     }
   };
   Horse.init({

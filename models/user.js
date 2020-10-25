@@ -11,11 +11,11 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      models.User.hasOne(models.Account),
-      models.User.hasOne(models.Permission),
-      models.User.hasMany(models.Horse),
-      models.User.hasMany(models.Course)
-      models.User.hasMany(models.Session)
+      //models.User.hasOne(models.Account),
+      //models.User.hasOne(models.Permission),
+      //models.User.hasOne(models.Horse),
+      //models.User.hasOne(models.Course)
+      //models.User.hasOne(models.Session)
     }
   };
   User.init({
@@ -29,3 +29,4 @@ module.exports = (sequelize, DataTypes) => {
   });
   return User;
 };
+

@@ -3,7 +3,7 @@ const express = require('express');
 const usersController = require('./Routes/UsersController');
 const horsesController =  require('./routes/HorsesController');
 const coursesController = require('./routes/CoursesController');
-
+const sessionController = require('./routes/SessionController');
 
 // Routes
 exports.router = (function () {
@@ -57,6 +57,14 @@ exports.router = (function () {
 
     // Show course
     apiRouter.route('/courses/show').get(coursesController.show);
+
+    // Session routes
+
+    // Add user to courses
+    apiRouter.route('/session/add/user').post(sessionController.addUser);
+
+    // Add horses to a user course
+    apiRouter.route('/session/add/user/horse').post(sessionController.addHorse);
 
     return apiRouter;
 })();

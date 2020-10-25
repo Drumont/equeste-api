@@ -24,6 +24,14 @@ module.exports = {
           key: 'id'
         }
       },
+      horse_id: {
+
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'Horses',
+          key: 'id'
+        }
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

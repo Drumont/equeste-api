@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
       models.Account.belongsTo(models.User, {
         foreignKey: {
           //allowNull: false
+          name: 'user_id'
         }
       })
     }

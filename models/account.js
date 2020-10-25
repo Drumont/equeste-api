@@ -13,7 +13,8 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       models.Account.belongsTo(models.User, {
         foreignKey: {
-          allowNull: false
+          //allowNull: false
+          name: 'user_id'
         }
       })
     }
@@ -22,7 +23,6 @@ module.exports = (sequelize, DataTypes) => {
     firstname: DataTypes.STRING,
     lastname: DataTypes.STRING,
     licence: DataTypes.STRING,
-    phone: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'Account',

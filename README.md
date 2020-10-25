@@ -1,1 +1,1 @@
-# equeste-api
+# equestre-api

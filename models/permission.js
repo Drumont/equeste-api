@@ -11,9 +11,10 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      models.Account.belongsTo(models.Permission, {
+      models.Permission.belongsTo(models.User, {
         foreignKey: {
-          allowNull: false
+          //allowNull: false
+          name: 'permission_id'
         }
       })
     }

@@ -3,7 +3,8 @@ const bcrypt = require('bcrypt');
 const jwtUtils = require('../assets/jwt.utils');
 const response = require('../apiRouter');
 var models = require('../models');
-const asyncLib = require('async')
+const asyncLib = require('async');
+const { Op } = require('sequelize');
 
 const EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const PASSWORD_REGEX = /^(?=.*\d).{4,8}$/;
@@ -21,8 +22,9 @@ module.exports = {
         var lastname = req.body.lastname;
         var licence = req.body.licence;
         var phone = req.body.phone;
+        var permission_id = req.body.permission_id;
 
-        if(email == null || password == null || firstname == null){
+        if((email == null || phone == null) && password == null ){
             return res.status(400).json(response.error('Missing parameters'));
         }
         if(!EMAIL_REGEX.test(email)){
@@ -37,7 +39,11 @@ module.exports = {
            function (done) {
                models.User.findOne({
                    attributes: ['email'],
-                   where: {email: email}
+                   where: {
+                       [Op.or]: [
+                           {email : (email) ? email : ' '},
+                           {phone : (phone) ? phone : ' '}
+                       ]}
                })
                    .then(function (userFound) {
                        done(null, userFound);
@@ -53,7 +59,6 @@ module.exports = {
                        firstname: firstname,
                        lastname: lastname,
                        licence: licence,
-                       phone: phone
                    })
                        .then(function (newAccount){
                             done(null, userFound, newAccount);
@@ -81,7 +86,8 @@ module.exports = {
                    email: email,
                    password: bcryptedPassword,
                    account_id: newAccount.id,
-                   permission_id: 1
+                   permission_id: permission_id,
+                   phone: phone
                })
                    .then(function (newUser) {
                        done(null, newUser);
@@ -97,58 +103,8 @@ module.exports = {
                    return res.status(500).json(response.error('Cannot add User'+err))
                }
            }
-
        ])
 
-        /*
-        models.User.findOne({
-            attributes: ['email'],
-            where: {email: email}
-        })
-            .then(function (userFound){
-                if(!userFound){
-
-                    // Account creation
-                    var newAccount = models.Account.create({
-                        firstname: firstname,
-                        lastname: lastname,
-                        licence: licence,
-                        phone: phone
-                    })
-                        .then(function (newAccount) {
-
-                            // Bcrypt password
-                            bcrypt.hash(password, 5, function (err, bcryptedPassword){
-
-                                // User creation
-                                var newUser = models.User.create({
-                                    email: email,
-                                    password: bcryptedPassword,
-                                    account_id: newAccount.id,
-                                    permission_id: 1
-                                })
-                                    .then(function (newUser) {
-                                        return res.status(201).json(response.success(newUser.id))
-                                    })
-                                    .catch(function (err) {
-                                        return res.status(500).json(response.error('Cannot add User'+err))
-                                    })
-                            })
-                        })
-
-                        .catch(function (err) {
-                            return res.status(500).json(response.error('Cannot add Account '+err))
-                         })
-
-
-                }else{
-                    return res.status(409).json(response.error('User already exits'));
-                }
-            })
-            .catch(function (err){
-                return res.status(500).json(response.error('Unable to verify user'));
-            });
-        */
     },
 
     // Login function
@@ -156,9 +112,10 @@ module.exports = {
 
         // Params
         var email = req.body.email;
+        var phone = req.body.phone;
         var password = req.body.password;
 
-        if (email == null || password == null) {
+        if ((email == null || phone == null) && password == null ) {
             return res.status(400).json(response.error('Missing parameters'));
         }
 
@@ -166,14 +123,17 @@ module.exports = {
         asyncLib.waterfall([
             function (done) {
                 models.User.findOne({
-                    where: {email: email}
+                    where: {
+                        [Op.or]: [
+                            {email : (email) ? email : ' '},
+                            {phone : (phone) ? phone : ' '}
+                        ]}
                 })
                     .then(function (userFound){
                         done(null, userFound);
                     })
                     .catch(function (err){
                         return res.status(500).json(response.error('Unable to verify user' + err ));
-
                     })
             },
             function (userFound, done) {
@@ -353,7 +313,6 @@ module.exports = {
                 }
             }
         ]);
-
     },
 
     // Search a user by his/her email

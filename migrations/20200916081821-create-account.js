@@ -17,9 +17,9 @@ module.exports = {
       licence: {
         type: Sequelize.STRING
       },
-      phone: {
+      /*phone: {
         type: Sequelize.STRING
-      },
+      },*/
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

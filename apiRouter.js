@@ -67,6 +67,9 @@ exports.router = (function () {
     // Get all courses
     apiRouter.route('/courses/all').get(coursesController.getAll);
 
+    // Get all courses by Id
+    apiRouter.route('/courses/all-by-user').get(coursesController.getAllById);
+
     // Session routes
 
     // Add user to courses

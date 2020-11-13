@@ -178,7 +178,7 @@ module.exports = {
         ]);
     },
 
-    // Get all horses
+    // Get all course
     getAll: function (req, res) {
         // Getting auth header
         let headerAuth = req.headers['authorization'];
@@ -187,6 +187,27 @@ module.exports = {
         asyncLib.waterfall([
             function (done) {
                 models.Course.findAll()
+                    .then(function (courses) {
+                        return res.status(201).json(response.success(courses));
+                    })
+                    .catch(function (err) {
+                        return res.status(500).json(response.error('Unable to verify horse' + err));
+                    });
+            },
+        ]);
+    },
+
+    // Get all course Id created
+    getAllById: function (req, res) {
+        // Getting auth header
+        let headerAuth = req.headers['authorization'];
+        let user = jwtUtils.getUser(headerAuth);
+
+        asyncLib.waterfall([
+            function (done) {
+                models.Course.findAll({
+                    where: { createdBy_id: user.userId }
+                })
                     .then(function (courses) {
                         return res.status(201).json(response.success(courses));
                     })

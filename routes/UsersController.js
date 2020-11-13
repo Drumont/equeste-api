@@ -90,15 +90,15 @@ module.exports = {
                    phone: phone
                })
                    .then(function (newUser) {
-                       done(null, newUser);
+                       done(null, newUser, newAccount);
                    })
                    .catch(function (err) {
                        return res.status(500).json(response.error('Cannot add User'+err))
                    })
            },
-           function (newUser) {
+           function (newUser, newAccount) {
                if (newUser){
-                   return res.status(201).json(response.success(newUser.id))
+                   return res.status(201).json(response.success({'newUser' : newUser, 'newAccount' : newAccount}))
                } else {
                    return res.status(500).json(response.error('Cannot add User'+err))
                }
@@ -181,20 +181,37 @@ module.exports = {
         if (userId < 0) {
             return res.status(400).json(response.error('Wrong token'))
         } else {
-            models.User.findOne({
-                attributes: [ 'id', 'email', 'account_id', 'permission_id'],
-                where: { id: userId }
-            })
-                .then(function (user) {
-                    if (user) {
-                        res.status(201).json(response.success(user));
-                    } else {
-                        res.status(404).json(response.error('User not found'));
+            asyncLib.waterfall([
+                function (done) {
+                    models.User.findOne({
+                        where: { id: userId }
+                    })
+                        .then(function (user) {
+                            done(null, user);
+                        })
+                        .catch(function (err) {
+                        res.status(500).json(response.error('Cannot fetch user'+err));
+                        });
+                },
+                function (user, done) {
+                    models.Account.findOne({
+                        where: {id : user.account_id}
+                    })
+                        .then(function (account) {
+                            done(null, account, user)
+                        })
+                        .catch(function (err) {
+                            res.status(500).json(response.error('Cannot fetch account'+err));
+                        });
+                },
+                function (account, user, done) {
+                    if(user && account) {
+                        res.status(201).json(response.success({user: user, account: account}));
+                    }else {
+                        res.status(404).json(response.error('User not exists'));
                     }
-                })
-                .catch(function (err) {
-                    res.status(500).json(response.error('Cannot fetch user'+err));
-                });
+                }
+            ])
         }
     },
 
@@ -211,7 +228,6 @@ module.exports = {
         let firstname = req.body.firstname;
         let lastname = req.body.lastname;
         let licence = req.body.licence;
-        let phone = req.body.phone;
 
         asyncLib.waterfall([
             function (done) {
@@ -228,14 +244,14 @@ module.exports = {
             },
             function(userFound, done) {
                 models.Account.findOne({
-                    attributes: ['id', 'firstname', 'lastname', 'licence', 'phone'],
+                    attributes: ['id', 'firstname', 'lastname', 'licence'],
                     where: { id: userFound.account_id }
                 })
                     .then(function (accountFound) {
-                    done(null, accountFound);
+                        done(null, accountFound);
                     })
                     .catch(function(err) {
-                        return res.status(500).json({ 'error': 'unable to verify account' });
+                        return res.status(500).json(response.error('unable to verify account' + err ));
                     });
             },
             function(accountFound, done) {
@@ -244,7 +260,6 @@ module.exports = {
                         firstname: (firstname ? firstname : accountFound.firstname),
                         lastname: (lastname ? lastname : accountFound.lastname),
                         licence: (licence ? licence : accountFound.licence),
-                        phone: (phone ? phone : accountFound.phone)
                     })
                         .then(function() {
                             done(null, accountFound);
@@ -362,6 +377,28 @@ module.exports = {
     isAble : function (permission_id) {
         return (permission_id === 1 || permission_id === 3);
     },
+
+    // Get all users
+    getAll: function (req, res) {
+        // Getting auth header
+        let headerAuth = req.headers['authorization'];
+        let user = jwtUtils.getUser(headerAuth);
+
+        asyncLib.waterfall([
+            function (done) {
+                models.User.findAll({
+                    include: [{ model: models.Account}]
+                })
+                    .then(function (data) {
+                        return res.status(201).json(response.success(data));
+                        })
+                        .catch(function (err) {
+                            return res.status(500).json(response.error('Unable to verify horse' + err));
+                        });
+            }
+        ])
+
+    }
 
 
 

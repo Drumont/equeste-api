@@ -15,9 +15,10 @@ module.exports = {
         var user = jwtUtils.getUser(headerAuth);
 
         var title = req.body.title;
-        var description = req.body.description;
+        var level = req.body.level;
         var started_date = req.body.started_date;
         var duration = req.body.duration;
+        var max_participant = req.body.max_participant;
 
         if(title == null){
             return res.status(400).json(response.error('Missing parameters'));
@@ -31,7 +32,8 @@ module.exports = {
                     if(userControllers.isAble(user.permission_id)) {
                         var newCourse = models.Course.create({
                             title: title,
-                            description: description,
+                            level: level,
+                            max_participant: max_participant,
                             started_date: started_date,
                             duration: duration,
                             createdBy_id: user.userId
@@ -61,10 +63,11 @@ module.exports = {
         var user = jwtUtils.getUser(headerAuth);
 
         var title = req.body.title;
-        var description = req.body.description;
+        var level = req.body.level;
         var started_date = req.body.started_date;
         var duration = req.body.duration;
-        var course_id = req.body.course_id
+        var id = req.body.id;
+        var max_participant = req.body.max_participant;
 
         if(title == null){
             return res.status(400).json(response.error('Missing parameters'));
@@ -76,8 +79,8 @@ module.exports = {
             asyncLib.waterfall([
                 function (done) {
                     models.Course.findOne({
-                        attributes: ['id', 'title', 'description', 'started_date', 'createdBy_id'],
-                        where: { id: course_id}
+                        attributes: ['id', 'title', 'level', 'started_date', 'max_participant','createdBy_id'],
+                        where: { id: id}
                     })
                         .then(function (courseFound) {
                             done(null, courseFound);
@@ -90,7 +93,8 @@ module.exports = {
                     if(userControllers.isAble(user.permission_id)) {
                         courseFound.update({
                             title: (title ? title : courseFound.title),
-                            description: (description ? description : courseFound.description),
+                            level: (level ? level : courseFound.level),
+                            max_participant: (max_participant ? max_participant : courseFound.max_participant),
                             started_date: (started_date ? started_date : courseFound.started_date),
                             duration: (duration ? duration : courseFound.duration),
                         })
@@ -123,7 +127,7 @@ module.exports = {
         asyncLib.waterfall([
             function (done) {
                 models.Course.findOne({
-                    attributes: ['id', 'title', 'description', 'started_date', 'createdBy_id'],
+                    attributes: ['id', 'title', 'level', 'started_date', 'createdBy_id'],
                     where: { id: course_id}
                 })
                     .then(function (courseFound) {
@@ -161,7 +165,7 @@ module.exports = {
         asyncLib.waterfall([
             function (done) {
                 models.Course.findOne({
-                    attributes: ['id', 'title', 'description', 'started_date', 'createdBy_id'],
+                    attributes: ['id', 'title', 'level', 'started_date', 'max_participant', 'createdBy_id'],
                     where: { id: course_id }
                 })
                     .then(function (courseFound) {
@@ -174,5 +178,23 @@ module.exports = {
         ]);
     },
 
+    // Get all horses
+    getAll: function (req, res) {
+        // Getting auth header
+        let headerAuth = req.headers['authorization'];
+        let user = jwtUtils.getUser(headerAuth);
+
+        asyncLib.waterfall([
+            function (done) {
+                models.Course.findAll()
+                    .then(function (courses) {
+                        return res.status(201).json(response.success(courses));
+                    })
+                    .catch(function (err) {
+                        return res.status(500).json(response.error('Unable to verify horse' + err));
+                    });
+            },
+        ]);
+    }
 
 }

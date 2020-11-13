@@ -164,7 +164,8 @@ module.exports = {
         let headerAuth = req.headers['authorization'];
         let user = jwtUtils.getUser(headerAuth);
 
-        let id = req.body.id;
+        let id = req.params['id'];
+        console.log('Id '+ id);
 
         asyncLib.waterfall([
             function (done) {
@@ -180,6 +181,27 @@ module.exports = {
                     });
             },
         ]);
+    },
+
+    // Get all horses
+    getAll: function (req, res){
+        // Getting auth header
+        let headerAuth = req.headers['authorization'];
+        let user = jwtUtils.getUser(headerAuth);
+
+        asyncLib.waterfall([
+            function (done) {
+                models.Horse.findAll()
+                    .then(function (horses) {
+                        return res.status(201).json(response.success(horses));
+                    })
+                    .catch(function(err) {
+                        return res.status(500).json(response.error('Unable to verify horse' + err));
+                    });
+            },
+        ]);
+
+
     }
 
 

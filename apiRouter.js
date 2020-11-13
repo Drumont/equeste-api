@@ -29,6 +29,8 @@ exports.router = (function () {
     // Search user by email
     apiRouter.route('/users/search/user-by-email').get(usersController.searchUserByEmail);
 
+    // Get all courses
+    apiRouter.route('/users/all').get(usersController.getAll);
 
     // Horses routes
 
@@ -42,7 +44,11 @@ exports.router = (function () {
     apiRouter.route('/horses/delete').delete(horsesController.delete);
 
     // Show horse
-    apiRouter.route('/horses/show').get(horsesController.show);
+    apiRouter.route('/horses/show/:id').get(horsesController.show);
+
+    // Get all horses
+    apiRouter.route('/horses/all').get(horsesController.getAll);
+
 
     // Courses routes
 
@@ -57,6 +63,9 @@ exports.router = (function () {
 
     // Show course
     apiRouter.route('/courses/show').get(coursesController.show);
+
+    // Get all courses
+    apiRouter.route('/courses/all').get(coursesController.getAll);
 
     // Session routes
 

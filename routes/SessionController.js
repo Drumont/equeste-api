@@ -54,7 +54,7 @@ module.exports = {
         var course_id = req.body.course_id;
 
         if ( await userAlreadyAdded(course_id, user.userId)) {
-            return res.status(500).json({'error': 'This user is already add to this course'});
+            return res.status(500).json(response.error('This user is already add to this course'));
         }
 
         asyncLib.waterfall([

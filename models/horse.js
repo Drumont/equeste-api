@@ -10,8 +10,8 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
-      models.Horse.belongsTo(models.User, {foreignKey: { name: 'user_id'}})
+      // define association heres
+      models.Horse.belongsTo(models.User, {foreignKey: { name: 'createdBy_id'}})
       //models.Horse.hasOne(models.Session)
     }
   };
